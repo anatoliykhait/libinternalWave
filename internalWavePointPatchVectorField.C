@@ -62,8 +62,8 @@ internalWavePointPatchVectorField
 :
     fixedValuePointPatchField<vector>(p, iF, dict),
     amplitude_(dict.lookup("amplitude")),
-    omega_(dict.get<scalar>("omega")),
-    phase_(dict.get<scalar>("phase"))
+    omega_(dict.lookup("omega")),
+    phase_(dict.lookup("phase"))
 {
     if (!dict.found("value"))
     {
