@@ -66,9 +66,13 @@ Foam::solidBodyMotionFunctions::internalWaveLinearMotion::transformation() const
 {
     scalar t = time_.value();
 
-    vector components = (0, 0, 0);
+    vector sum = vector(0.0,0.0,0.0);
+    for (label jsc = 0; jsc < amplitude_.size(); ++jsc)
+    {
+        sum += amplitude_[jsc] * cos(omega_[jsc] * t + phase_[jsc]);
+    }
 
-    const vector displacement = amplitude_*sin(omega_*t);
+    const vector displacement = sum;
 
     quaternion R(1);
     septernion TR(septernion(-displacement)*R);
