@@ -141,7 +141,7 @@ void internalWavePointPatchVectorField::write(Ostream& os) const
 makePointPatchTypeField
 (
     pointPatchVectorField,
-    oscillatingDisplacementPointPatchVectorField
+    internalWavePointPatchVectorField
 );
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -86,7 +86,7 @@ public:
         //- Construct by mapping given patchField<vector> onto a new patch
         internalWavePointPatchVectorField
         (
-            const oscillatingDisplacementPointPatchVectorField&,
+            const internalWavePointPatchVectorField&,
             const pointPatch&,
             const DimensionedField<vector, pointMesh>&,
             const pointPatchFieldMapper&
