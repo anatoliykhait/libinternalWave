@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "internalWaveLinearMotion.C": "cpp",
-        "internalWavePointPatchVectorField.C": "cpp"
+        "internalWavePointPatchVectorField.C": "cpp",
+        "textFields.C": "cpp"
     }
 }

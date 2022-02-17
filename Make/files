@@ -1,4 +1,5 @@
 internalWaveLinearMotion.C
 internalWavePointPatchVectorField.C
+textFields.C
 
 LIB = $(FOAM_USER_LIBBIN)/libinternalWave
