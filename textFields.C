@@ -51,12 +51,30 @@ Foam::functionObjects::textFields::textFields
 )
 :
     fvMeshFunctionObject(name, runTime, dict),
+    runTime_(runTime),
     UName_(dict.lookup("U")),
     alphaName_(dict.lookup("alpha")),
     U_(lookupObject<volVectorField>(UName_)),
     alpha_(lookupObject<volScalarField>(alphaName_))
 {
     read(dict);
+
+    folder_ = word(dict.lookup("folder"));
+
+    if (UPstream::master())
+    {
+        struct stat st;
+        if (stat(folder_.data(), &st) == -1)
+        {
+            // "0777" == -rwxrwxrwx
+            mkdir(folder_.data(), 0777);
+        }
+        else
+        {
+            Info << "Folder " << folder_ << " exists ;"
+                 << " continue writing in this folder" << endl;
+        }
+    }
 }
 
 
@@ -74,16 +92,38 @@ bool Foam::functionObjects::textFields::execute()
 {
     // Info << "This is EXECUTE" << endl;
 
+    // int a;
+    // forAll(mesh_.cells(),cellI)
+    // {
+    //     ++a;
+    // }
+
+    // Info << a << endl;
+
     return true;
 }
 
 
 bool Foam::functionObjects::textFields::write()
 {
-    forAll (U_, celli)
+    std::ofstream filefields;
+    filefields.open(
+               ("./" + folder_ + "/time_" + runTime_.timeName()).data(),
+               std::ios::out);
+
+    filefields << "# x   y   z   u   v   w   alpha" 
+               << "\n";
+
+    if (Pstream::parRun())
+    {
+
+    }
+    else
     {
         
     }
+
+    filefields.close();
 
     return true;
 }

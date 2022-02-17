@@ -31,6 +31,7 @@ Class
 #ifndef functionObjects_textFields_H
 #define functionObjects_textFields_H
 
+#include <sys/stat.h>
 #include "fvCFD.H"
 #include "fvMeshFunctionObject.H"
 
@@ -50,7 +51,28 @@ class textFields
 :
 public fvMeshFunctionObject
 {
+
+private:
+
     // Private Data
+
+        //- Current time of the simulation
+        const Time& runTime_;
+
+        //- Name of the directory
+        word folder_;
+
+        //- Name of velocity field
+        word UName_;
+
+        //- Name of alpha field
+        word alphaName_;
+
+        //- Reference to velocity field
+        const volVectorField& U_;
+
+        //- Reference to alpha field
+        const volScalarField& alpha_;
 
     // Private Member Functions
 
@@ -75,24 +97,9 @@ public:
         //- No copy assignment
         void operator=(const textFields&) = delete;
 
-
     //- Destructor
-    virtual ~textFields() = default;
 
-    // Private Data
-
-        //- Name of velocity field
-        word UName_;
-
-        //- Name of alpha field
-        word alphaName_;
-
-        //- Reference to velocity field
-        const volVectorField& U_;
-
-        //- Reference to alpha field
-        const volScalarField& alpha_;
-        
+        virtual ~textFields() = default;
 
     // Member Functions
 
