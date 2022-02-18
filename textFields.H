@@ -76,6 +76,18 @@ private:
 
     // Private Member Functions
 
+        void writeCUA
+        (
+            std::ofstream&,
+            const vectorField&,
+            const vectorField&,
+            const scalarField&
+        );
+
+        void parRunMaster(std::ofstream&);
+
+        void parRunSlave();
+
 public:
 
     //- Runtime type information

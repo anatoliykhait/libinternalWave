@@ -41,6 +41,86 @@ namespace functionObjects
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+void Foam::functionObjects::textFields::writeCUA
+(
+    std::ofstream& filefields,
+    const vectorField& MeshCWrite,
+    const vectorField& UWrite,
+    const scalarField& AlphaWrite
+)
+{
+    forAll(MeshCWrite,cellI)
+    {
+        filefields << MeshCWrite[cellI].x() << " "
+                   << MeshCWrite[cellI].y() << " "
+                   << MeshCWrite[cellI].z() << " ";
+        filefields << UWrite[cellI].x() << " "
+                   << UWrite[cellI].y() << " "
+                   << UWrite[cellI].z() << " ";
+        filefields << AlphaWrite[cellI] << "\n";
+    }
+}
+
+void Foam::functionObjects::textFields::parRunMaster
+(
+    std::ofstream& filefields
+)
+{
+    writeCUA
+    (
+        filefields,
+        mesh_.C().internalField(),
+        U_.internalField(),
+        alpha_.internalField()
+    );
+
+    for (int slave = Pstream::firstSlave();
+             slave <= Pstream::lastSlave();
+             slave++)
+    {
+        Info << "slave = " << slave << endl;
+
+        IPstream fromSlave(Pstream::commsTypes::blocking, slave);
+
+        vectorField bufferMeshC,
+                    bufferU;
+        scalarField bufferAlpha;
+
+        Info << "Before transfer" << endl;
+
+        fromSlave >> bufferMeshC
+                  >> bufferU
+                  >> bufferAlpha;
+
+        Info << "After transfer" << endl;
+
+        writeCUA
+        (
+            filefields,
+            bufferMeshC,
+            bufferU,
+            bufferAlpha
+        );
+    }
+
+    return;
+}
+
+void Foam::functionObjects::textFields::parRunSlave()
+{
+    OPstream toMaster(Pstream::commsTypes::blocking, Pstream::masterNo());
+
+    const vectorField& bufferMeshC = mesh_.C().internalField();
+    const vectorField& bufferU = U_.internalField();
+    const scalarField& bufferAlpha = alpha_.internalField();
+
+    toMaster << bufferMeshC
+             << bufferU
+             << bufferAlpha;
+
+    return;
+}
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::functionObjects::textFields::textFields
@@ -103,25 +183,32 @@ bool Foam::functionObjects::textFields::write()
                ("./" + folder_ + "/time_" + runTime_.timeName()).data(),
                std::ios::out);
 
+    filefields << "# runTime = " << runTime_.timeName()
+               << "\n";
+
     filefields << "# x   y   z   u   v   w   alpha" 
                << "\n";
 
     if (Pstream::parRun())
     {
-
+        if (Pstream::myProcNo() != Pstream::masterNo())
+        {
+            parRunSlave();
+        }
+        else
+        {
+            parRunMaster(filefields);
+        }
     }
     else
     {
-        forAll(mesh_.cells(),cellI)
-        {
-            filefields << mesh_.C()[cellI].x() << " "
-                       << mesh_.C()[cellI].y() << " "
-                       << mesh_.C()[cellI].z() << " ";
-            filefields << U_[cellI][0] << " "
-                       << U_[cellI][1] << " "
-                       << U_[cellI][2] << " ";
-            filefields << alpha_[cellI] << "\n";
-        }
+        writeCUA
+        (
+            filefields,
+            mesh_.C().internalField(),
+            U_.internalField(),
+            alpha_.internalField()
+        );
     }
 
     filefields.close();
