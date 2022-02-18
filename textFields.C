@@ -92,14 +92,6 @@ bool Foam::functionObjects::textFields::execute()
 {
     // Info << "This is EXECUTE" << endl;
 
-    // int a;
-    // forAll(mesh_.cells(),cellI)
-    // {
-    //     ++a;
-    // }
-
-    // Info << a << endl;
-
     return true;
 }
 
@@ -120,7 +112,16 @@ bool Foam::functionObjects::textFields::write()
     }
     else
     {
-        
+        forAll(mesh_.cells(),cellI)
+        {
+            filefields << mesh_.C()[cellI].x() << " "
+                       << mesh_.C()[cellI].y() << " "
+                       << mesh_.C()[cellI].z() << " ";
+            filefields << U_[cellI][0] << " "
+                       << U_[cellI][1] << " "
+                       << U_[cellI][2] << " ";
+            filefields << alpha_[cellI] << "\n";
+        }
     }
 
     filefields.close();
